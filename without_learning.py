@@ -2,10 +2,12 @@ import tensorflow as tf
 import numpy as np
 from keras.preprocessing.sequence import pad_sequences
 import pickle
-import xml.etree.ElementTree as ET
 import re
+import xml.etree.ElementTree as ET
+from rapidfuzz import process
+import warnings
+warnings.simplefilter("ignore")
 
-# Загрузка обученной модели и сохранённых объектов
 model = tf.keras.models.load_model('pos_model.h5')
 with open('word_encoder.pkl', 'rb') as f:
     word_encoder = pickle.load(f)
@@ -14,20 +16,32 @@ with open('tag_encoder.pkl', 'rb') as f:
 with open('max_seq_len.pkl', 'rb') as f:
     max_seq_len = pickle.load(f)
 
-# Класс лемматизатора (использует словарь из dict.opcorpora.xml)
 class Lemmatizer:
-    def __init__(self, dictionary_path):
+    def __init__(self, dictionary_path, score_cutoff=90):
         self.lemmas = {}
+        self.score_cutoff = score_cutoff
         self.load_dictionary(dictionary_path)
 
     def load_dictionary(self, dictionary_path):
         tree = ET.parse(dictionary_path)
         root = tree.getroot()
         for lemma in root.findall("lemmata/lemma"):
+            # Берем базовую (словарную) форму из элемента <l>
             lemma_text = lemma.find("l").get("t")
             for form in lemma.findall("f"):
                 form_text = form.get("t").lower()
                 self.lemmas[form_text] = lemma_text
+
+    def find_best_match(self, word):
+        # Используем RapidFuzz для нечеткого поиска
+        best = process.extractOne(word, self.lemmas.keys(), score_cutoff=self.score_cutoff)
+        if best:
+            candidate = best[0]
+            # Если кандидат слишком короткий, то считаем, что подходящего совпадения не найдено (Эвристика!)
+            if len(candidate) < 0.6 * len(word):
+                return None
+            return candidate
+        return None
 
     def lemmatize(self, text):
         # Токенизация с сохранением знаков препинания
@@ -37,25 +51,35 @@ class Lemmatizer:
             lower_token = token.lower()
             if lower_token in self.lemmas:
                 lemma = self.lemmas[lower_token]
-                lemmatized_tokens.append(f"{token}{{{lemma}=}}")
             else:
-                lemmatized_tokens.append(f"{token}{{{token}=}}")
+                candidate = self.find_best_match(lower_token)
+                if candidate:
+                    lemma = self.lemmas[candidate]
+                else:
+                    # Эвристика для глаголов: если слово заканчивается на "ет",
+                    # попробуем заменить окончание на "ь" (например, "печет" -> "печь")
+                    if lower_token.endswith("ет"):
+                        new_word = lower_token[:-2] + "ь"
+                        if new_word in self.lemmas:
+                            lemma = self.lemmas[new_word]
+                        else:
+                            lemma = lower_token
+                    else:
+                        lemma = lower_token 
+            lemmatized_tokens.append(f"{token}{{{lemma}=}}")
         return " ".join(lemmatized_tokens)
 
-# Инициализация лемматизатора (файл dict.opcorpora.xml должен быть доступен)
-lemmatizer = Lemmatizer("dict.opcorpora.xml")
 
-# Обработка входного текста
-input_text = "Тут можно ввести любой свой текст! Сеть угадывает даже сленг. Кринж, скуф"
-input_text = "Царица. Лечь на печь. я хочу печь пироги"
-input_text = "Отче наш, в 20:00 12.12.2012 Иже еси на небесех, да святится Имя твоё"
-input_text = "я люблю русскую землю"
+opencorpora_dict_path = "dict.opcorpora.xml"
+lemmatizer = Lemmatizer(opencorpora_dict_path, score_cutoff=90)
+
+# Ввод текста
+input_text = "я люблю русскую землю. Ежи гуляют по лесу! Очень быстро течет ручей, а бабушка печет пироги. Привет! Приветствую, друзья."
 
 lemmatized_output = lemmatizer.lemmatize(input_text)
 print("Лемматизированное предложение:")
 print(lemmatized_output)
 
-# Разбор лемматизированного текста для получения пар (слово, лемма)
 data = []
 tokens = lemmatized_output.strip().split()
 sentence = []
@@ -67,9 +91,7 @@ for token in tokens:
         sentence.append((word, lemma))
 data.append(sentence)
 
-# Преобразование слов в индексы с использованием сохранённого word_encoder
 words_only = [w for (w, _) in data[0]]
-# Если слово не найдено в словаре, используем индекс первого слова в словаре как запасной вариант
 fallback_index = word_encoder.transform([word_encoder.classes_[0]])[0]
 encoded_words = []
 for word in words_only:
@@ -82,8 +104,8 @@ for word in words_only:
 # Паддинг последовательности до длины max_seq_len
 X = pad_sequences([encoded_words], maxlen=max_seq_len, padding='post')
 
-# Получение предсказаний модели
-predictions = model.predict(X)  # shape: (1, seq_len, num_tags)
+# Получение предсказаний модели (предсказание частей речи)
+predictions = model.predict(X)
 pred_indices = np.argmax(predictions[0], axis=-1)
 pred_tags = tag_encoder.inverse_transform(pred_indices)
 
