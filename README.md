@@ -1,7 +1,9 @@
 # NLP Homonyms
 
 ## Краткое описание
+
 Проект решает задачу автоматического определения части речи (**POS-tagging**) и снятия омонимии в русском языке. В нём сочетаются два подхода:
+
 - **HMM-теггер** (Hidden Markov Model)
 - **Нейронная сеть** (LSTM + fastText эмбеддинги)
 
@@ -10,12 +12,22 @@
 ## Установка и настройка
 
 ### 1️. Клонирование репозитория
+
 ```bash
 git clone https://github.com/mikhailshceglov/NLP_Homonyms.git
 cd NLP_Homonyms
 ```
 
-### 2️. Создание виртуального окружения
+### 2️. Разархивирование данных
+
+Перед началом работы необходимо разархивировать `opcorpora.zip`, содержащий файлы `dict.opcorpora.xml`, `annot.opcorpora.xml` и другие:
+
+```bash
+unzip opcorpora.zip -d ./
+```
+
+### 3️. Создание виртуального окружения
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # Для Linux/Mac
@@ -23,11 +35,14 @@ source venv/bin/activate  # Для Linux/Mac
 # venv\Scripts\activate
 ```
 
-### 3️. Установка зависимостей
+### 4️. Установка зависимостей
+
 ```bash
 pip install -r requirements.txt
 ```
+
 Список основных библиотек (указан в `requirements.txt`):
+
 - `tensorflow==2.10.0`
 - `numpy==1.21.6`
 - `scikit-learn==1.0.2`
@@ -64,36 +79,47 @@ NLP_Homonyms/
 ## Использование
 
 ### 1. Подготовка данных
+
 Если нужно сгенерировать корпус из файла OpenCorpora (например, `annot.opcorpora.xml`), запустите:
+
 ```bash
 python3 make_processed_txt.py
 ```
+
 Скрипт создаст/обновит файл `processed_corpus.txt`.
 
 ### 2. Обучение HMM-теггера
+
 ```bash
 cd hmm_method
 python3 train_hmm.py
 ```
+
 Скрипт обучит HMM-модель и сохранит её в файл `hmm_tagger.pkl`.
 
 ### 3. Использование HMM-теггера
+
 ```bash
 python3 use_hmm.py
 ```
+
 Скрипт загрузит модель `hmm_tagger.pkl` и словарь OpenCorpora (`dict.opcorpora.xml`), затем выведет разметку и лемматизацию текста.
 
 ### 4. Обучение нейронной сети
+
 ```bash
 cd neural_network
 python3 learning_saving.py
 ```
-Скрипт использует файл `processed_corpus.txt` для обучения LSTM-модели с fastText-эмбеддингами.  
+
+Скрипт использует файл `processed_corpus.txt` для обучения LSTM-модели с fastText-эмбеддингами.\
 Результат: файлы `pos_model.h5`, `word_encoder.pkl`, `tag_encoder.pkl` и `max_seq_len.pkl` будут сохранены в папке.
 
 ### 5. Использование нейронной сети без обучения
+
 ```bash
 python3 without_learning.py
 ```
+
 Скрипт загрузит готовую модель (`pos_model.h5` и другие файлы) и выведет результат POS-теггинга и лемматизации для примерного текста.
 
