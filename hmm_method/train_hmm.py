@@ -57,7 +57,7 @@ def main():
     
     # Обучаем HMM-теггер на обучающих данных
     hmm_tagger = train_hmm_tagger(train_data)
-    
+
     # Оцениваем точность модели на тестовой выборке
     accuracy = hmm_tagger.evaluate(test_data)
     print(f"Accuracy on test set: {accuracy:.2%}")

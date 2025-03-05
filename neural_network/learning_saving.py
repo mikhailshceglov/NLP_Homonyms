@@ -102,6 +102,20 @@ model.fit(
     verbose=1
 )
 
+# Генерация предсказаний для расчёта подробных метрик
+y_pred = model.predict(X_test)
+y_pred = np.argmax(y_pred, axis=-1)
+y_true = np.argmax(y_test, axis=-1)
+
+true_tags = []
+pred_tags = []
+
+for i in range(len(y_true)):
+    for j in range(len(y_true[i])):
+        if y_true[i][j] != 0:
+            true_tags.append(tag_encoder.inverse_transform([y_true[i][j]])[0])
+            pred_tags.append(tag_encoder.inverse_transform([y_pred[i][j]])[0])
+
 loss, accuracy = model.evaluate(X_test, y_test)
 print(f"Loss: {loss}, Accuracy: {accuracy}")
 

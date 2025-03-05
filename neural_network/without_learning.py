@@ -70,11 +70,11 @@ class Lemmatizer:
         return " ".join(lemmatized_tokens)
 
 
-opencorpora_dict_path = "dict.opcorpora.xml"
+opencorpora_dict_path = "../dict.opcorpora.xml"
 lemmatizer = Lemmatizer(opencorpora_dict_path, score_cutoff=90)
 
 # Ввод текста
-input_text = "я люблю русскую землю. Ежи гуляют по лесу! Очень быстро течет ручей, а бабушка печет пироги. Привет! Приветствую, друзья. Привет, макет, пакет"
+input_text = "я люблю русскую землю. Ежи гуляют по лесу! Очень быстро течет ручей, а бабушка печет пирог. Привет! Приветствую, друзья. Привет, макет, пакет"
 
 lemmatized_output = lemmatizer.lemmatize(input_text)
 print("Лемматизированное предложение:")
