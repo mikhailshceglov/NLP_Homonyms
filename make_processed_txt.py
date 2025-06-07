@@ -15,7 +15,7 @@ def parse_opencorpora(input_path, output_path):
             for token in sentence.findall(".//token"):
                 token_text = token.get("text") 
 
-                # Извлекаем первую лемму и её часть речи
+                # Извлекаем лемму и её часть речи
                 lemma = None
                 pos = None
                 for l in token.findall(".//l"):
@@ -36,3 +36,4 @@ def parse_opencorpora(input_path, output_path):
 
 parse_opencorpora(input_file, output_file)
 print(f"Обработка завершена. Результаты сохранены в {output_file}")
+

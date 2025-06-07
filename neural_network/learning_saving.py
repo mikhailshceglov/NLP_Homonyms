@@ -6,7 +6,9 @@ from keras.models import Sequential
 from keras.layers import Embedding, LSTM, Dense, TimeDistributed, Bidirectional
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
-import fasttext
+
+import fasttext # пройдет два года, мы забудем
+
 import pickle
 import xml.etree.ElementTree as ET
 import re
