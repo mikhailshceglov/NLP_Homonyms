@@ -1,7 +1,9 @@
 tensorflow==2.10.0
 numpy==1.21.6
 scikit-learn==1.0.2
-keras==2.6.0
+keras==3.8.0
 fasttext==0.9.2
 nltk==3.7
 rapidfuzz==2.13.7
+pip install nltk==3.9.1
+
