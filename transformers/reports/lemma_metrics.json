@@ -1,0 +1,9 @@
+{
+  "data": "/home/misha/Gold/NLP_Homonyms/transformers/data/processed/lemma_test.tsv",
+  "model_dir": "/home/misha/Gold/NLP_Homonyms/transformers/models/lemma_lstm",
+  "total_words_scored": 252962,
+  "skipped_non_words": 3855,
+  "exact_match_accuracy": 0.9354764747274295,
+  "cer": 0.009858619249972833,
+  "avg_edit_distance": 0.10902823348961505
+}

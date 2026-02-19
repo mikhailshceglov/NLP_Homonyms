@@ -1,0 +1,7 @@
+[lemma] seen=50000 scored=49328 acc_exact=0.9183 cer=0.0126 skipped=672
+[lemma] seen=100000 scored=98678 acc_exact=0.9231 cer=0.0119 skipped=1322
+[lemma] seen=150000 scored=148414 acc_exact=0.9341 cer=0.0101 skipped=1586
+[lemma] seen=200000 scored=198095 acc_exact=0.9392 cer=0.0091 skipped=1905
+[lemma] seen=250000 scored=247320 acc_exact=0.9364 cer=0.0097 skipped=2680
+[lemma] exact=0.9355 cer=0.0099 avg_ed=0.1090
+[lemma] saved: /home/misha/Gold/NLP_Homonyms/transformers/reports/lemma_metrics.json
